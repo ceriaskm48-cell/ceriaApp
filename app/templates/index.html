@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Home – CERIA SKM{% endblock %}
+{% block content %}
+<section class="hero">
+	<div class="hero-text">
+		<h1>CERIA SKM Admin</h1>
+		<p>Platform internal untuk memantau dan meningkatkan kualitas pelayanan berdasarkan Survei Kepuasan Masyarakat. Akses hasil respon secara real‑time, ekspor ringkas, dan kelola data langsung dari browser Anda.</p>
+		<div class="hero-cta">
+			<a class="btn" target="_blank" href="{{ form_url }}">Buka Google Form</a>
+			<a class="btn secondary" href="/dashboard">Lihat Dashboard</a>
+			<a class="btn outline" href="/manage">Kelola Data</a>
+		</div>
+		<p style="margin-top:10px; font-size:13px; color:var(--color-text-light)">Worksheet aktif: <strong>{{ worksheet }}</strong></p>
+	</div>
+	<div class="card" style="text-align:center; align-self:start;">
+		<h3 style="margin-top:0;">Mode Gelap / Terang</h3>
+		<p style="font-size:14px; color:var(--color-text-light);">Klik ikon 🌙/☀️ di kanan atas untuk mengganti tema. Preferensi otomatis tersimpan di browser.</p>
+		<hr style="border:none; border-top:1px solid var(--color-border); margin:18px 0;"/>
+		<h3>Fitur Utama</h3>
+		<ul style="text-align:left; padding-left:18px; line-height:1.5; font-size:14px; margin:0;">
+			<li>Rata-rata per pertanyaan & per Puskesmas</li>
+			<li>Ekspor CSV ringkas & penuh</li>
+			<li>Edit & hapus baris langsung</li>
+			<li>Dark mode & UI responsif</li>
+		</ul>
+			<hr style="border:none; border-top:1px solid var(--color-border); margin:18px 0;"/>
+			<h3 style="margin:0 0 8px;">QR Form</h3>
+			<p style="margin:0 0 12px; font-size:13px; color:var(--color-text-light);">Scan untuk mengisi survei.</p>
+			<img src="/qr" alt="QR Google Form" style="width:160px; height:160px; image-rendering:pixelated; border:1px solid var(--color-border); border-radius:8px; background:#fff;" />
+			<p style="margin:10px 0 0;">
+				<a href="/qr" download="CERIA_SKM_FORM_QR.png" class="btn outline" style="padding:6px 12px; font-size:12px;">Unduh QR</a>
+			</p>
+	</div>
+</section>
+{% endblock %}

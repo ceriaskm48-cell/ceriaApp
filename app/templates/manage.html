@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Manage – CERIA SKM{% endblock %}
+{% block content %}
+<div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:18px;">
+  <h1 style="flex:1; margin:0; font-size:26px;">Kelola Data</h1>
+  <a class="btn" href="/export/full.csv">Ekspor CSV Penuh</a>
+  <a class="btn secondary" href="/dashboard">Ke Dashboard</a>
+</div>
+<div class="card">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          {% for h in headers %}<th>{{ h }}</th>{% endfor %}
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for row in rows %}
+        <tr>
+          {% for i in range(headers|length) %}
+            <td>{{ row[i] if i < row|length else '' }}</td>
+          {% endfor %}
+          <td style="display:flex; gap:6px;">
+            <a class="btn outline" href="/edit/{{ loop.index }}" style="padding:6px 12px; font-size:12px;">Edit</a>
+            <form action="/delete/{{ loop.index }}" method="post" onsubmit="return confirm('Hapus baris ini?');">
+              <button class="btn danger" style="padding:6px 12px; font-size:12px;">Hapus</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

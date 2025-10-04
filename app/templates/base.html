@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id" class="no-js">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}CERIA SKM{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/modern-normalize/2.0.0/modern-normalize.min.css" integrity="sha512-7l/MN8zLwAWYlggJ3QXkGLwZVrV0t1Ik5+pUvNbK/CtYQgQki71R+xVQ1BM8DT6vKrrO5evkP7k+El8UvDN6mQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <script>
+    // Persist dark mode preference
+    const storedTheme = localStorage.getItem('ceria-theme');
+    if (storedTheme === 'dark') document.documentElement.classList.add('dark');
+  </script>
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  <div class="navbar">
+    <a class="brand" href="/">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" />
+      <span>CERIA SKM</span>
+    </a>
+    <nav>
+      <a href="/" class="{% if request.path=='/' %}active{% endif %}">Home</a>
+      <a href="/dashboard" class="{% if request.path.startswith('/dashboard') %}active{% endif %}">Dashboard</a>
+      <a href="/manage" class="{% if request.path.startswith('/manage') %}active{% endif %}">Manage</a>
+    </nav>
+    <div class="nav-spacer"></div>
+    <button class="toggle-dark" id="toggleDark" aria-label="Toggle Mode">🌙</button>
+  </div>
+  <main class="container fade-in">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="alert">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer>© 2025 CERIA SKM – Dibuat dengan Flask</footer>
+  <script>
+    const btn = document.getElementById('toggleDark');
+    function syncIcon(){ btn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙'; }
+    syncIcon();
+    btn.addEventListener('click', ()=>{
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('ceria-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+      syncIcon();
+    });
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

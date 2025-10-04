@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Edit Baris {{ rownum }} – CERIA SKM{% endblock %}
+{% block content %}
+<div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:18px;">
+  <h1 style="flex:1; margin:0; font-size:26px;">Edit Baris {{ rownum }}</h1>
+  <a class="btn secondary" href="/manage">Kembali</a>
+</div>
+<form method="post" class="card" style="padding:24px;">
+  <div class="table-wrapper" style="max-height:520px;">
+    <table>
+      <thead><tr><th style="width:240px;">Kolom</th><th>Nilai</th></tr></thead>
+      <tbody>
+      {% for h in headers %}
+        <tr>
+          <td style="font-weight:500;">{{ h }}</td>
+          <td>
+            <input type="text" name="col_{{ loop.index0 }}" value="{{ current[loop.index0] if loop.index0 < current|length else '' }}" 
+                   style="width:100%; padding:8px 10px; border:1px solid var(--color-border); background:var(--color-surface); color:var(--color-text); border-radius:6px;" />
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div style="margin-top:20px; display:flex; gap:10px;">
+    <button class="btn" type="submit">Simpan Perubahan</button>
+    <a class="btn outline" href="/manage">Batal</a>
+  </div>
+</form>
+{% endblock %}

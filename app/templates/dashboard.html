@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard – CERIA SKM{% endblock %}
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+{% block content %}
+<h1 style="margin-top:0; font-size:28px;">Dashboard</h1>
+<div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin-bottom:18px;">
+  <button class="btn" onclick="loadData()">Muat Ulang</button>
+  <a class="btn secondary" href="/export/summary.csv">Ekspor CSV Ringkas</a>
+  <label style="font-size:14px; font-weight:500;">Filter Puskesmas:
+    <select id="filterPuskesmas" onchange="renderAll()" style="margin-left:6px; padding:8px 10px; border:1px solid var(--color-border); border-radius:6px; background:var(--color-surface); color:var(--color-text);">
+      <option value="Semua">Semua</option>
+    </select>
+  </label>
+</div>
+
+<div class="card" style="margin-bottom:26px;">
+  <canvas id="chart" height="110"></canvas>
+  <div id="overallBadge" style="margin-top:14px; font-weight:600;"></div>
+</div>
+
+<div class="grid cols-3" style="margin-bottom:30px;" id="metricsGrid"></div>
+
+<div class="card" style="margin-bottom:34px;">
+  <h3 style="margin-top:0;">Ringkasan per Pertanyaan</h3>
+  <div class="table-wrapper">
+    <table id="tblSummary">
+      <thead><tr><th>Pertanyaan</th><th>Rata-rata</th><th>Keterangan</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0;">Ringkasan per Puskesmas</h3>
+  <div class="table-wrapper">
+    <table id="tblGroup">
+      <thead><tr><th>Puskesmas</th><th>Rata-rata</th><th>Keterangan</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+let rawData = null; let chartRef = null;
+async function loadData(){
+  const res = await fetch('/api/dashboard-data');
+  rawData = await res.json();
+  buildFilter();
+  renderAll();
+}
+function buildFilter(){
+  const sel = document.getElementById('filterPuskesmas');
+  sel.innerHTML = '<option value="Semua">Semua</option>' + rawData.puskesmas_list.map(p=>`<option>${p}</option>`).join('');
+}
+function renderAll(){
+  if(!rawData) return;
+  const metricsGrid = document.getElementById('metricsGrid');
+  metricsGrid.innerHTML = '';
+  // Overall metric card
+  const ovRemark = rawData.overall < rawData.threshold ? 'Evaluasi Diperlukan' : 'OK';
+  metricsGrid.innerHTML += `<div class="card metric"><h3>Rata-rata Keseluruhan</h3><div class="value">${rawData.overall.toFixed(2)}</div><div class="remark ${ovRemark==='OK' ? 'ok':'warn'}">${ovRemark}</div></div>`;
+
+  // Chart
+  const ctx = document.getElementById('chart').getContext('2d');
+  if(chartRef) chartRef.destroy();
+  chartRef = new Chart(ctx, { type:'bar', data:{ labels: rawData.labels, datasets:[{ label:'Rata-rata', data: rawData.averages, backgroundColor: rawData.labels.map(()=> '#2563eb') }] }, options:{ scales:{ y:{ beginAtZero:true, max:4 } }, plugins:{ legend:{ display:false } } }});
+
+  const ob = document.getElementById('overallBadge');
+  ob.innerHTML = `Rata-rata Keseluruhan: <span class='badge ${ovRemark==='OK' ? 'ok':'warn'}'>${rawData.overall.toFixed(2)} – ${ovRemark}</span>`;
+
+  // Summary per question
+  const tbody = document.querySelector('#tblSummary tbody');
+  tbody.innerHTML='';
+  rawData.labels.forEach((l,i)=>{
+    const avg = rawData.averages[i];
+    const remark = avg < rawData.threshold ? 'Evaluasi Diperlukan' : 'OK';
+    const cls = remark==='OK' ? 'ok' : 'warn';
+    tbody.innerHTML += `<tr><td>${l}</td><td>${avg.toFixed(2)}</td><td><span class='badge ${cls}'>${remark}</span></td></tr>`;
+  });
+  tbody.innerHTML += `<tr><td><strong>Rata-rata Keseluruhan</strong></td><td><strong>${rawData.overall.toFixed(2)}</strong></td><td><span class='badge ${ovRemark==='OK' ? 'ok':'warn'}'>${ovRemark}</span></td></tr>`;
+
+  // Grouped
+  const tbodyG = document.querySelector('#tblGroup tbody');
+  tbodyG.innerHTML='';
+  rawData.grouped.forEach(g=>{
+    const cls = g.remark==='OK' ? 'ok' : 'warn';
+    tbodyG.innerHTML += `<tr><td>${g.name}</td><td>${g.avg.toFixed(2)}</td><td><span class='badge ${cls}'>${g.remark}</span></td></tr>`;
+  });
+}
+loadData();
+</script>
+{% endblock %}
