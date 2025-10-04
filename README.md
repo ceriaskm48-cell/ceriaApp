@@ -132,3 +132,45 @@ git push -u origin main
 
 Setelah push pertama, workflow Actions akan otomatis membangun image dan mendorong ke `ghcr.io/ceriaskm48-cell/ceriaApp:latest` (dan tag lain sesuai metadata).
 
+---
+
+## GitHub Pages (Snapshot Statis)
+GitHub Pages tidak bisa menjalankan Flask secara dinamis, tetapi kita menyediakan workflow `pages-snapshot.yml` untuk menghasilkan versi read-only yang otomatis membangun direktori `docs/` dari Google Sheets.
+
+### Cara Mengaktifkan
+1. Tambahkan Secrets repo (Settings → Secrets and variables → Actions):
+  - `CERIA_SKM_SERVICE_ACCOUNT_JSON`  (isi full JSON service account)
+  - `CERIA_SKM_SPREADSHEET_ID`        (ID spreadsheet)
+  - `CERIA_SKM_WORKSHEET_NAME`        (nama worksheet; default `Form Responses 2`)
+2. (Opsional) Tambah Repository Variable: `CERIA_SKM_FORM_URL` untuk override link form.
+3. Pastikan file `.github/workflows/pages-snapshot.yml` ada di branch `main`.
+4. Settings → Pages → Source: Deploy from branch → pilih `main` dan folder `docs`.
+5. Trigger build: push ke `main` atau gunakan *Run workflow* di tab Actions.
+6. Akses: `https://<username>.github.io/<repo>/` → memuat `index.html` snapshot.
+
+### Isi Snapshot
+| File | Fungsi |
+|------|--------|
+| index.html | Ringkasan, QR, link dashboard |
+| dashboard.html | Chart interaktif memuat data dari `data.json` |
+| data.json | Data hasil ekstraksi & perhitungan rata-rata |
+| summary.csv | Ringkasan per pertanyaan + overall |
+| full.csv | Semua baris mentah sheet |
+| qr.png | Kode QR form Google |
+| style.css | Gaya visual sederhana (disalin dari app) |
+
+### Keterbatasan Snapshot
+- Tidak ada endpoint edit / delete / export dinamis.
+- Data hanya diperbarui saat workflow jalan (push atau jadwal 6 jam).
+- Jangan menaruh kredensial dalam file statis; service account hanya dipakai runtime di Actions.
+
+### Menjalankan Snapshot Manual (Lokal)
+```
+python generate_static_site.py
+# Hasil di ./docs
+```
+
+Kemudian Anda bisa membuka `docs/index.html` langsung di browser (tanpa server) untuk verifikasi.
+
+---
+
